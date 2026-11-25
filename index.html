@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html data-theme="light"><head>
     <script>
@@ -655,7 +656,7 @@
 .sug-fold-sum::after { content: "+"; font-size: 14px; font-weight: 600; }
 .sug-fold[open] .sug-fold-sum::after { content: "−"; }
 .sug-fold #planSuggest { border: 0; box-shadow: none; margin: 0; border-top: 1px solid var(--line, #ddd); }
-#planTimeline .tt-ctl .tb-seg[aria-label="Schedule view"] { display: none; }
+
 
 /* ---- Stoic Design System (Marble, Ink, Bronze, Slate) ---- */
 :root[data-theme="stoic"] .card,
@@ -1811,6 +1812,7 @@ details.addwrap .plan-add { padding: 10px 12px; }
         <input type="file" id="syncImportFile" accept=".html,.htm,.json" hidden>
       </div>
     </div>
+    <button type="button" class="stoic-rq" id="stoicRq" data-revqueue="1">Revision queue</button>
     <div class="themeseg" id="themeSwitch" role="group" aria-label="Theme"><button type="button" data-settheme="light" aria-pressed="true">Light</button><button type="button" data-settheme="dark" aria-pressed="false">Dark</button><button type="button" data-settheme="stoic" aria-pressed="false">Alternate</button></div>
   </header>
 
@@ -1833,6 +1835,8 @@ details.addwrap .plan-add { padding: 10px 12px; }
     <button type="button" class="vbtn" data-view="tracker" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 19h16M6 19V8M10 19V8M14 19V8M18 19V8M4 8l8-4 8 4"></path></svg><span>Syllabus</span></button>
     <button type="button" class="vbtn" data-view="test" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M12 4v16M7 20h10M5 8h14M5 8l-2 5h4l-2-5M19 8l-2 5h4l-2-5"></path></svg><span>Tests</span></button>
   </nav>
+
+  <aside class="stoic-cov" id="stoicCov" aria-label="Subject coverage"></aside>
 
   <div class="view" id="viewTracker" data-superof="stoa" hidden="">
 
@@ -5030,6 +5034,532 @@ body.ql-open { overflow: hidden; }
 .qlhost.chapter .qlbar { display: none; }
 .qlhost iframe { flex: 1; width: 100%; border: 0; background: var(--bg); }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Merriweather:wght@400;700&display=swap">
+<style id="stoic-shell">
+/* =====================================================================
+   ALTERNATE THEME · "Stoa" — sidebar + dashboard shell
+   Marble, ink, slate and bronze. Everything below is scoped to
+   :root[data-theme="stoic"], so Light and Dark are untouched.
+   ===================================================================== */
+.sg, .sen-pair { display: contents; }
+.sen-tgt, .sen-focus-empty, .stoic-rq, .stoic-cov { display: none; }
+
+:root[data-theme="stoic"] {
+  --st-side: #EEEAE0;
+  --st-bronze: #8A6A2E;
+  --st-bronze-soft: #C49A45;
+  --st-slate: #2B3A42;
+  --st-ink: #1C1B18;
+  --st-marble: #FCFBF8;
+  --st-radius: 4px;
+}
+
+/* ---------- shell: fixed sidebar, scrolling content ---------- */
+@media (min-width: 1000px) {
+  :root[data-theme="stoic"] body { background: var(--page); margin: 0; padding: 0; }
+  :root[data-theme="stoic"] .sg { display: block; }
+  :root[data-theme="stoic"] main {
+    display: grid; max-width: none; width: 100%; margin: 0; padding: 0; gap: 0;
+    height: 100vh; height: 100dvh; overflow: hidden; border: 0; background:
+      linear-gradient(to right, var(--st-side) 0, var(--st-side) 267px, var(--line-strong) 267px, var(--line-strong) 268px, var(--page) 268px);
+    grid-template-columns: 267px 1px minmax(0, 1fr) auto auto auto;
+    grid-template-rows: auto auto auto auto minmax(0, 1fr);
+    grid-template-areas: none; align-content: start;
+  }
+  :root[data-theme="stoic"] main > * { margin: 0 !important; }
+  :root[data-theme="stoic"] .top { display: contents; }
+  :root[data-theme="stoic"] .top > div:first-child { grid-column: 1; grid-row: 1; padding: 26px 24px 4px; align-self: end; }
+  :root[data-theme="stoic"] .top h1 { font-size: 30px; font-weight: 500; color: var(--st-ink); letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+  :root[data-theme="stoic"] .top h1::before { content: ""; width: 14px; height: 22px; flex: none;
+    background: linear-gradient(var(--st-bronze), var(--st-bronze)) 0 0/100% 3px no-repeat,
+                linear-gradient(var(--st-bronze), var(--st-bronze)) 0 100%/100% 3px no-repeat,
+                linear-gradient(90deg, transparent 1px, var(--st-bronze) 1px, var(--st-bronze) 3px, transparent 3px, transparent 5.5px, var(--st-bronze) 5.5px, var(--st-bronze) 7.5px, transparent 7.5px, transparent 10px, var(--st-bronze) 10px, var(--st-bronze) 12px, transparent 12px) 0 4px/100% 14px no-repeat; }
+
+  /* top bar */
+  :root[data-theme="stoic"] main::before {
+    content: "Today\2019s duty"; grid-column: 3 / -1; grid-row: 1; align-self: center;
+    font-family: var(--font-serif); font-size: 28px; font-weight: 500; letter-spacing: -0.01em; color: var(--st-ink);
+    padding: 22px 0 18px 32px; border-bottom: 1px solid var(--line); margin-right: -1px;
+  }
+  :root[data-theme="stoic"] main:has(#viewTracker:not([hidden]))::before { content: "Syllabus matrix"; }
+  :root[data-theme="stoic"] main:has(#viewTest:not([hidden]))::before { content: "Mock tests"; }
+  :root[data-theme="stoic"] .stoic-rq, :root[data-theme="stoic"] .sync-wrap, :root[data-theme="stoic"] .themeseg { align-self: center; }
+  :root[data-theme="stoic"] .stoic-rq { display: inline-flex; grid-column: 4; grid-row: 1; margin: 0 8px 0 0 !important; }
+  :root[data-theme="stoic"] .sync-wrap { grid-column: 5; grid-row: 1; margin-right: 8px !important; }
+  :root[data-theme="stoic"] .themeseg { grid-column: 6; grid-row: 1; margin-right: 28px !important; }
+  /* the grid's top row underline spans the whole bar */
+  :root[data-theme="stoic"] .stoic-rq, :root[data-theme="stoic"] .sync-wrap, :root[data-theme="stoic"] .themeseg { position: relative; z-index: 1; }
+
+  /* sidebar pieces */
+  :root[data-theme="stoic"] .supernav { display: none; }
+  :root[data-theme="stoic"] .studybar { grid-column: 1; grid-row: 2; padding: 6px 24px 22px !important; border: 0; background: transparent; }
+  :root[data-theme="stoic"] .studybar .overall { display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 2px 12px; max-width: none; }
+  :root[data-theme="stoic"] .studybar .big { grid-row: 1 / 3; font-size: 34px; font-weight: 500; font-family: var(--font-serif); color: var(--st-ink); line-height: 1; }
+  :root[data-theme="stoic"] .studybar .overall-side { display: contents; }
+  :root[data-theme="stoic"] .studybar .overall-side small { grid-column: 2; grid-row: 1; font-size: 11.5px; color: var(--muted); letter-spacing: .02em; align-self: end; }
+  :root[data-theme="stoic"] .studybar .meter { grid-column: 1 / -1; grid-row: 3; margin-top: 10px; height: 4px; border-radius: 0; background: #DDD7C8; box-shadow: none; }
+  :root[data-theme="stoic"] .studybar .meter i { background: var(--st-bronze); }
+  :root[data-theme="stoic"] .viewnav {
+    grid-column: 1; grid-row: 3; flex-direction: column; gap: 2px; padding: 0 14px 18px; background: transparent; border: 0;
+  }
+  :root[data-theme="stoic"] .vbtn {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; border-left: 2px solid transparent; border-radius: var(--st-radius);
+    color: #4B473F; background: transparent; text-align: left;
+  }
+  :root[data-theme="stoic"] .vbtn span { font-family: var(--font-serif); font-size: 18px; font-weight: 500; letter-spacing: 0; }
+  :root[data-theme="stoic"] .vbtn svg { width: 18px; height: 18px; opacity: .75; }
+  :root[data-theme="stoic"] .vbtn:hover { background: rgba(28,27,24,.06); color: var(--st-ink); }
+  :root[data-theme="stoic"] .vbtn[aria-pressed="true"] { background: var(--st-ink); color: var(--st-marble); border-left-color: var(--st-bronze-soft); border-bottom: 0; }
+  :root[data-theme="stoic"] .vbtn[aria-pressed="true"] svg { color: var(--st-bronze-soft); opacity: 1; }
+  :root[data-theme="stoic"] .vbtn[aria-pressed="true"] span { font-weight: 600; }
+
+  :root[data-theme="stoic"] .stoic-cov { display: block; grid-column: 1; grid-row: 4; padding: 18px 24px 8px; border-top: 1px solid var(--line-strong); margin: 0 14px !important; padding-left: 10px; padding-right: 10px; }
+  .sc-h { margin: 0 0 12px; font-family: var(--font-serif); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .sc-i { margin-bottom: 12px; }
+  .sc-t { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; margin-bottom: 5px; }
+  .sc-t b { font-weight: 500; color: var(--st-ink); }
+  .sc-t span { font-family: var(--font-num); font-size: 12px; color: var(--muted); }
+  .stoic-cov .meter { height: 3px; border-radius: 0; background: #DDD7C8; box-shadow: none; border: 0; }
+  .stoic-cov .meter i { background: var(--st-slate); }
+
+  :root[data-theme="stoic"] .backup-foot {
+    grid-column: 1; grid-row: 5; align-self: end; flex-direction: column; align-items: flex-start; gap: 2px; justify-content: flex-end;
+    margin: 0 14px 0 !important; padding: 14px 10px 18px; border-top: 1px solid var(--line-strong); font-size: 13px;
+  }
+  :root[data-theme="stoic"] .backup-foot .linkbtn { text-decoration: none; color: #4B473F; padding: 6px 2px; font-size: 13px; cursor: pointer; }
+  :root[data-theme="stoic"] .backup-foot .linkbtn:hover { color: var(--st-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* content scroller */
+  :root[data-theme="stoic"] #viewPlan, :root[data-theme="stoic"] #viewTracker, :root[data-theme="stoic"] #viewTest {
+    grid-column: 3 / -1; grid-row: 2 / -1; min-height: 0; overflow: auto; padding: 24px 28px 40px 32px; background: var(--page);
+  }
+}
+
+/* ---------- shared look of the Alternate theme ---------- */
+:root[data-theme="stoic"] .stoic-rq, :root[data-theme="stoic"] .savebtn {
+  font: inherit; font-size: 12.5px; font-weight: 600; color: var(--st-ink); background: var(--st-marble); border: 1px solid var(--line-strong); border-radius: var(--st-radius); padding: 7px 12px; cursor: pointer; line-height: 1.2;
+}
+:root[data-theme="stoic"] .stoic-rq:hover, :root[data-theme="stoic"] .savebtn:hover { border-color: var(--st-ink); }
+:root[data-theme="stoic"] .themeseg { border: 1px solid var(--line-strong); background: var(--st-marble); border-radius: var(--st-radius); }
+:root[data-theme="stoic"] .themeseg button { color: #4B473F; border-right-color: var(--line); padding: 7px 11px; font-weight: 600; }
+:root[data-theme="stoic"] .themeseg button:hover { background: #EFEBE1; color: var(--st-ink); }
+:root[data-theme="stoic"] .themeseg button[aria-pressed="true"] { background: var(--st-ink); color: var(--st-marble); }
+
+:root[data-theme="stoic"] .card { background: var(--st-marble); border: 1px solid var(--line); border-radius: 6px; box-shadow: none; }
+:root[data-theme="stoic"] .sen-badge { border-radius: 2px; font-family: var(--font-num); letter-spacing: .06em; }
+:root[data-theme="stoic"] .sen-badge.behind { background: transparent; color: var(--plan); border: 1px solid color-mix(in srgb, var(--plan) 45%, transparent); }
+
+/* ---------- Today's duty: two-column dashboard ---------- */
+@media (min-width: 1000px) {
+  :root[data-theme="stoic"] .td-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); column-gap: 24px; row-gap: 0; align-items: start; max-width: 1240px; margin: 0 auto; }
+  :root[data-theme="stoic"] .td-main, :root[data-theme="stoic"] .td-side, :root[data-theme="stoic"] .sen-say { display: contents; }
+  /* the Seneca card is its own two-column grid (briefing | counsel) so one tall side never stretches the other's rows */
+  :root[data-theme="stoic"] #seneca { display: grid; grid-column: 1 / -1; grid-row: 1; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); grid-template-rows: auto auto auto auto minmax(0, 1fr); column-gap: 24px; row-gap: 0; align-items: start;
+    border: 0; background: transparent; padding: 0; margin: 0 0 24px; }
+
+  /* Daily briefing card, assembled from stacked pieces so it reads as one card */
+  :root[data-theme="stoic"] .sen-head, :root[data-theme="stoic"] .sen-maxim, :root[data-theme="stoic"] .sg-brief, :root[data-theme="stoic"] .sg-risks, :root[data-theme="stoic"] .sen-acts {
+    grid-column: 1; background: var(--st-marble); border-left: 1px solid var(--line); border-right: 1px solid var(--line); padding-left: 24px; padding-right: 24px; align-self: stretch; margin: 0;
+  }
+  :root[data-theme="stoic"] .sen-head { grid-row: 1; border-top: 1px solid var(--line); border-radius: 6px 6px 0 0; padding-top: 20px; padding-bottom: 6px; }
+  :root[data-theme="stoic"] .sen-maxim { grid-row: 2; border-left: 1px solid var(--line); box-shadow: inset 3px 0 0 var(--st-bronze); padding-top: 4px; padding-bottom: 10px; font-size: 15.5px; color: #55514A; }
+  :root[data-theme="stoic"] .sg-brief { grid-row: 3; padding-bottom: 6px; }
+  :root[data-theme="stoic"] .sg-risks { grid-row: 4; padding-bottom: 6px; padding-top: 4px; }
+  :root[data-theme="stoic"] .sg-risks:empty { padding: 0; }
+  :root[data-theme="stoic"] .sen-acts { grid-row: 5; align-self: stretch; border-bottom: 1px solid var(--line); border-radius: 0 0 6px 6px; padding-top: 6px; padding-bottom: 22px; align-content: start; }
+  :root[data-theme="stoic"] .sen-head .eyebrow { font-family: var(--font-serif); font-size: 15px; letter-spacing: .02em; color: var(--st-ink); }
+  :root[data-theme="stoic"] .sen-mark { width: 28px; height: 28px; border-radius: 2px; background: var(--st-ink); color: var(--st-marble); font-size: 15px; }
+
+  :root[data-theme="stoic"] .sg-brief > p:first-child { font-family: var(--font-serif); font-size: 19px; line-height: 1.4; color: var(--st-ink); margin: 6px 0 16px; }
+  :root[data-theme="stoic"] .sg-brief > p:nth-child(2) { display: none; }
+  :root[data-theme="stoic"] .sen-bal { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 0; border: 0; background: transparent; margin: 0 0 12px; }
+  :root[data-theme="stoic"] .sen-bal-item { border: 1px solid var(--line-strong); border-radius: var(--st-radius); padding: 10px 12px 11px; background: var(--st-marble); gap: 8px; }
+  :root[data-theme="stoic"] .sen-bal-top { font-size: 13px; }
+  :root[data-theme="stoic"] .sen-bal-top span { font-size: 11.5px; }
+  :root[data-theme="stoic"] .sen-bal .meter { height: 4px; border: 0; border-radius: 0; background: #E3DDCF; }
+  :root[data-theme="stoic"] .sen-bal .meter i { background: var(--st-slate); }
+
+  :root[data-theme="stoic"] .sen-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 8px; }
+  :root[data-theme="stoic"] .sen-tgt, :root[data-theme="stoic"] .sen-pair .sen-focus {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 14px 16px; border: 1px solid var(--line-strong); border-left: 1px solid var(--line-strong); border-radius: var(--st-radius); background: var(--st-marble);
+  }
+  :root[data-theme="stoic"] .sen-pair .sen-focus:not(.sen-focus-empty) { flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; }
+  :root[data-theme="stoic"] .sen-pair .sen-focus-info { flex: 0 0 auto; width: 100%; }
+  :root[data-theme="stoic"] .sen-pair .sen-focus-ctl { width: 100%; }
+  :root[data-theme="stoic"] .sen-pair .sen-timer { margin-right: auto; text-align: left; min-width: 0; }
+  :root[data-theme="stoic"] .sen-tgt-info, :root[data-theme="stoic"] .sen-focus-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 auto; }
+  :root[data-theme="stoic"] .sen-tgt small, :root[data-theme="stoic"] .sen-focus-info small { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+  :root[data-theme="stoic"] .sen-tgt strong { font-family: var(--font-num); font-size: 26px; font-weight: 500; line-height: 1.1; color: var(--st-ink); }
+  :root[data-theme="stoic"] .sen-tgt strong b { font-weight: 500; }
+  :root[data-theme="stoic"] .sen-tgt strong i { font-style: normal; font-size: 12px; color: var(--muted); font-family: var(--font-ui); }
+  :root[data-theme="stoic"] .sen-tgt .stepper { display: inline-flex; gap: 6px; }
+  :root[data-theme="stoic"] .sen-tgt .stepper button { width: 28px; height: 28px; border: 1px solid var(--line-strong); background: var(--st-marble); border-radius: var(--st-radius); font-size: 15px; line-height: 1; cursor: pointer; color: var(--st-ink); }
+  :root[data-theme="stoic"] .sen-tgt .stepper button:hover { border-color: var(--st-ink); }
+  :root[data-theme="stoic"] .sen-focus-info strong { font-family: var(--font-serif); font-size: 15px; font-weight: 500; line-height: 1.25; color: var(--st-ink); }
+  :root[data-theme="stoic"] .sen-focus-empty { display: flex; }
+  :root[data-theme="stoic"] .sen-focus-empty strong { color: var(--muted); font-style: italic; }
+  :root[data-theme="stoic"] .sen-focus-ctl { gap: 6px; flex-wrap: nowrap; }
+  :root[data-theme="stoic"] .sen-timer { font-size: 22px; font-weight: 500; }
+  :root[data-theme="stoic"] .sen-focus-ctl .mini-btn { background: var(--st-ink); color: var(--st-marble); border: 1px solid var(--st-ink); padding: 6px 12px; border-radius: var(--st-radius); }
+  :root[data-theme="stoic"] .sen-focus-ctl .pill { padding: 6px 10px; }
+
+  :root[data-theme="stoic"] .sg-risks .sen-sub { margin: 12px 0 8px; }
+  :root[data-theme="stoic"] .sen-sub { font-family: var(--font-serif); font-size: 13px; font-weight: 500; letter-spacing: .08em; color: var(--muted); }
+  :root[data-theme="stoic"] .sen-list { list-style: none; padding: 0; margin: 0; }
+  :root[data-theme="stoic"] .sen-list li { position: relative; padding-left: 16px; font-size: 13px; color: #4B473F; margin-bottom: 5px; }
+  :root[data-theme="stoic"] .sen-list li::before { content: ""; position: absolute; left: 3px; top: .62em; width: 5px; height: 5px; background: var(--st-bronze); transform: rotate(45deg); }
+  :root[data-theme="stoic"] .sen-acts .pill.main { padding: 9px 16px; font-weight: 600; }
+
+  /* Counsel card (right column, top) */
+  :root[data-theme="stoic"] .sg-counsel {
+    grid-column: 2; grid-row: 1 / 6; align-self: stretch; background: var(--st-marble); border: 1px solid var(--line); border-radius: 6px; padding: 20px 22px 18px;
+  }
+  :root[data-theme="stoic"] .sg-counsel::before { content: "Counsel"; display: block; font-family: var(--font-serif); font-size: 19px; font-weight: 500; color: var(--st-ink); padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+  :root[data-theme="stoic"] .sg-counsel .sen-sub:first-child { margin-top: 12px; }
+  :root[data-theme="stoic"] .sen-routine { border: 0; margin: 0 0 4px; }
+  :root[data-theme="stoic"] .sen-routine li { padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; gap: 2px 10px; }
+  :root[data-theme="stoic"] .sen-routine li:last-child { border-bottom: 0; }
+  :root[data-theme="stoic"] .sen-routine .rt-t { flex: 0 0 100%; min-width: 0; font-size: 11.5px; letter-spacing: .02em; }
+  :root[data-theme="stoic"] .sen-routine .rt-n { flex: 1 1 0; }
+  :root[data-theme="stoic"] .sen-routine .rt-p { flex: 0 0 auto; }
+
+  /* Plan queue card */
+  :root[data-theme="stoic"] #planCard { grid-column: 1; grid-row: 2; padding: 20px 24px; gap: 10px; margin: 0 0 24px; }
+  :root[data-theme="stoic"] #planCard .eyebrow { font-family: var(--font-serif); font-size: 19px; font-weight: 500; color: var(--st-ink); letter-spacing: 0; margin: 0 0 6px; }
+  :root[data-theme="stoic"] #planCard .td-stats .line { display: none; }
+  :root[data-theme="stoic"] #planSuggest { display: block; }
+  :root[data-theme="stoic"] #planSuggest .sug-head .eyebrow { display: none; }
+  :root[data-theme="stoic"] details.sug-fold { grid-column: 1; grid-row: 3; padding: 0; margin: 0 0 24px; }
+  :root[data-theme="stoic"] .sug-fold-sum { pointer-events: none; padding: 18px 24px 0; font-family: var(--font-serif); font-size: 19px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--st-ink); }
+  :root[data-theme="stoic"] .sug-fold-sum::after { content: none; }
+  :root[data-theme="stoic"] .sug-fold #planSuggest { border-top: 0; padding: 8px 24px 20px; background: transparent; }
+
+  /* Schedule card (right column, below counsel) */
+  :root[data-theme="stoic"] #planTimeline { grid-column: 2; grid-row: 2 / 4; padding: 20px 22px 14px; margin: 0 0 24px; align-self: stretch; }
+  :root[data-theme="stoic"] #planTimeline .eyebrow { font-family: var(--font-serif); font-size: 19px; font-weight: 500; color: var(--st-ink); letter-spacing: 0; margin: 0; }
+  :root[data-theme="stoic"] #planTimeline .cb-head { align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+  :root[data-theme="stoic"] #planTimeline .eyebrow::after { content: " \00b7  Study blocks"; font-size: 0; }
+  :root[data-theme="stoic"] .tt-sum, :root[data-theme="stoic"] .tt-head { display: none; }
+  :root[data-theme="stoic"] #planTimeline .tt { border: 0; border-radius: 0; }
+  :root[data-theme="stoic"] #planTimeline .tt-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "n t l" "c c c"; column-gap: 8px; row-gap: 3px; align-items: baseline; padding: 11px 2px; border: 0; border-bottom: 1px solid var(--line); background: transparent; }
+  :root[data-theme="stoic"] #planTimeline .tt-row:last-child { border-bottom: 0; }
+  :root[data-theme="stoic"] #planTimeline .tt-row.rev { background: transparent; }
+  :root[data-theme="stoic"] #planTimeline .tt-n { grid-area: n; font-weight: 700; font-size: 12.5px; color: var(--st-ink); }
+  :root[data-theme="stoic"] #planTimeline .tt-t { grid-area: t; font-size: 12.5px; color: var(--muted); }
+  :root[data-theme="stoic"] #planTimeline .tt-t::before { content: "\00b7  "; }
+  :root[data-theme="stoic"] #planTimeline .tt-l { grid-area: l; font-size: 11.5px; color: var(--muted); display: block; }
+  :root[data-theme="stoic"] #planTimeline .tt-c { grid-area: c; min-width: 0; }
+  :root[data-theme="stoic"] #planTimeline .tt-empty { font-size: 12.5px; color: #8A867C; font-style: italic; }
+  :root[data-theme="stoic"] #planTimeline .tt-item.rev { border-left: 2px solid var(--st-bronze); padding-left: 10px; flex-wrap: wrap; gap: 6px 4px; }
+  :root[data-theme="stoic"] #planTimeline .tt-item .nm { flex: 1 1 100%; min-width: 0; }
+  :root[data-theme="stoic"] #planTimeline .tt-item .mini-btn { margin-left: 0 !important; padding: 3px 8px; font-size: 12px; }
+  :root[data-theme="stoic"] #planTimeline .tt-row.study:hover:not(.armed) { background: #F6F3EC; }
+}
+
+/* ---------- plan queue internals, any width ---------- */
+:root[data-theme="stoic"] .plan-list li { border-color: var(--line); }
+:root[data-theme="stoic"] .plan-list .nm b { font-weight: 600; }
+:root[data-theme="stoic"] .meter { height: 4px; border-radius: 0; background: #E3DDCF; box-shadow: none; }
+:root[data-theme="stoic"] .meter i { background: var(--st-slate); }
+:root[data-theme="stoic"] .pill.main { background: var(--st-ink); border-color: var(--st-ink); color: var(--st-marble); border-radius: var(--st-radius); }
+:root[data-theme="stoic"] .pill.main:hover { background: var(--st-slate); }
+:root[data-theme="stoic"] .mini-btn { border-radius: var(--st-radius); }
+:root[data-theme="stoic"] details.addwrap > summary { cursor: pointer; font-weight: 600; font-size: 13px; color: var(--st-ink); }
+
+/* ---------- narrow screens: stacked, top navigation ---------- */
+@media (max-width: 999px) {
+  :root[data-theme="stoic"] .sg { display: block; }
+  :root[data-theme="stoic"] .stoic-cov { display: none; }
+  :root[data-theme="stoic"] .supernav { display: none; }
+  :root[data-theme="stoic"] main { background: var(--page); }
+  :root[data-theme="stoic"] .top { flex-wrap: wrap; background: var(--st-side); color: var(--st-ink); border-bottom: 1px solid var(--line-strong); }
+  :root[data-theme="stoic"] .top h1 { color: var(--st-ink); }
+  :root[data-theme="stoic"] .stoic-rq { display: none; }
+  :root[data-theme="stoic"] .viewnav { background: var(--st-side); padding: 0 12px; border-bottom: 1px solid var(--line-strong); }
+  :root[data-theme="stoic"] .vbtn { color: #4B473F; }
+  :root[data-theme="stoic"] .vbtn[aria-pressed="true"] { color: var(--st-ink); border-bottom-color: var(--st-bronze); }
+  :root[data-theme="stoic"] .td-layout { display: flex; flex-direction: column; gap: 0; }
+  :root[data-theme="stoic"] .td-main, :root[data-theme="stoic"] #seneca, :root[data-theme="stoic"] .sen-say { display: contents; }
+  :root[data-theme="stoic"] .sen-head, :root[data-theme="stoic"] .sen-maxim, :root[data-theme="stoic"] .sg-brief, :root[data-theme="stoic"] .sg-risks, :root[data-theme="stoic"] .sen-acts { background: var(--st-marble); border-left: 1px solid var(--line); border-right: 1px solid var(--line); padding-left: 16px; padding-right: 16px; margin: 0; }
+  :root[data-theme="stoic"] .sen-head { border-top: 1px solid var(--line); border-radius: 6px 6px 0 0; padding-top: 16px; }
+  :root[data-theme="stoic"] .sen-acts { border-bottom: 1px solid var(--line); border-radius: 0 0 6px 6px; padding-bottom: 16px; margin-bottom: 16px; }
+  :root[data-theme="stoic"] .sg-counsel { order: 9; background: var(--st-marble); border: 1px solid var(--line); border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+  :root[data-theme="stoic"] .sen-pair { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  :root[data-theme="stoic"] .sen-tgt, :root[data-theme="stoic"] .sen-focus-empty { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border: 1px solid var(--line-strong); border-radius: var(--st-radius); }
+  :root[data-theme="stoic"] #planCard, :root[data-theme="stoic"] details.sug-fold, :root[data-theme="stoic"] #planTimeline { order: 10; margin-bottom: 16px; }
+}
+
+/* =====================================================================
+   ALTERNATE THEME · royal & stoic finish
+   Cinzel (Roman inscription capitals) for titles and labels, Cormorant
+   Garamond for statements and quotes, Spectral for reading text.
+   Imperial purple, laurel gold, marble. Greek-key borders, column and
+   scroll icons. Scoped to the Alternate theme only.
+   ===================================================================== */
+:root[data-theme="stoic"] {
+  --st-imperial: #2B2140;
+  --st-imperial-2: #3A2D57;
+  --st-gold: #B08D3C;
+  --st-gold-2: #C9A24D;
+  --st-gold-deep: #7C5F22;
+  --st-gold-faint: rgba(176, 141, 60, .22);
+  --st-display: "Cinzel", "Trajan Pro", "Optima", Georgia, serif;
+  --st-statement: "Cormorant Garamond", "EB Garamond", Georgia, serif;
+  --font-ui: "Spectral", "EB Garamond", Georgia, "Times New Roman", serif;
+  --font-serif: "Cormorant Garamond", "EB Garamond", Georgia, serif;
+  --font-num: "Cormorant Garamond", "EB Garamond", Georgia, serif;
+  --day: #3A2D57; --bar: #B08D3C;
+  --bar-bg: #2B2140; --nav2: #2B2140;
+  --plan: #8A5A12;
+}
+:root[data-theme="stoic"] body { font-family: var(--font-ui); font-size: 14px; font-feature-settings: "lnum" 1, "tnum" 1; font-variant-numeric: lining-nums tabular-nums; }
+:root[data-theme="stoic"] b, :root[data-theme="stoic"] strong { font-weight: 600; }
+:root[data-theme="stoic"] button, :root[data-theme="stoic"] input, :root[data-theme="stoic"] select, :root[data-theme="stoic"] textarea { font-family: var(--font-ui); }
+
+/* ---- inscription caps for titles and labels ---- */
+:root[data-theme="stoic"] h1 { font-family: var(--st-display); font-weight: 600; text-transform: uppercase; letter-spacing: .16em; font-size: 22px; }
+:root[data-theme="stoic"] .eyebrow,
+:root[data-theme="stoic"] #planCard .eyebrow,
+:root[data-theme="stoic"] #planTimeline .eyebrow,
+:root[data-theme="stoic"] .sug-fold-sum,
+:root[data-theme="stoic"] .sen-head .eyebrow,
+:root[data-theme="stoic"] .sg-counsel::before {
+  font-family: var(--st-display); font-weight: 600; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--st-imperial);
+}
+:root[data-theme="stoic"] .sen-sub, .sc-h, :root[data-theme="stoic"] .sen-tgt small, :root[data-theme="stoic"] .sen-focus-info small,
+:root[data-theme="stoic"] .tt-head, :root[data-theme="stoic"] .dl-stats dt {
+  font-family: var(--st-display); font-weight: 600; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--st-gold-deep);
+}
+:root[data-theme="stoic"] .stoic-cov .sc-h { font-size: 11px; }
+:root[data-theme="stoic"] .tab-name { font-family: var(--st-display); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
+:root[data-theme="stoic"] #planTimeline .tt-n { font-family: var(--st-display); font-weight: 700; letter-spacing: .1em; color: var(--st-gold-deep); font-size: 12px; }
+:root[data-theme="stoic"] .tt-item .nm b, :root[data-theme="stoic"] .plan-list .nm b, :root[data-theme="stoic"] .sen-list ~ * { letter-spacing: .02em; }
+:root[data-theme="stoic"] .tt-item .nm > b, :root[data-theme="stoic"] .plan-list .nm > span > b { font-family: var(--st-display); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; color: var(--st-imperial); margin-right: 6px; }
+
+/* ---- statements, quotes and figures in Cormorant ---- */
+:root[data-theme="stoic"] .sen-maxim { font-family: var(--st-statement); font-style: italic; font-weight: 500; font-size: 20px; line-height: 1.35; color: #4A3F5C; position: relative; }
+:root[data-theme="stoic"] .sg-brief > p:first-child { font-family: var(--st-statement); font-weight: 500; font-size: 21px; line-height: 1.38; color: #1F1A2B; }
+:root[data-theme="stoic"] .sen-tgt strong { font-family: var(--st-statement); font-weight: 600; font-size: 34px; letter-spacing: 0; color: var(--st-imperial); }
+:root[data-theme="stoic"] .sen-tgt strong i { font-family: var(--st-display); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--st-gold-deep); }
+:root[data-theme="stoic"] .sen-timer { font-family: var(--st-statement); font-weight: 600; font-size: 32px; letter-spacing: .02em; color: var(--st-imperial); }
+:root[data-theme="stoic"] .sen-focus-info strong { font-family: var(--st-statement); font-size: 17px; font-weight: 600; color: #1F1A2B; }
+:root[data-theme="stoic"] .studybar .big { font-family: var(--st-statement); font-weight: 600; font-size: 40px; color: var(--st-imperial); }
+:root[data-theme="stoic"] .studybar .overall-side small { font-family: var(--st-display); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--st-gold-deep); }
+:root[data-theme="stoic"] .sen-bal-top b, :root[data-theme="stoic"] .sc-t b { font-family: var(--st-display); font-weight: 600; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--st-imperial); }
+:root[data-theme="stoic"] .sen-bal-top span, :root[data-theme="stoic"] .sc-t span, :root[data-theme="stoic"] .rt-t, :root[data-theme="stoic"] .rt-p,
+:root[data-theme="stoic"] .tt-t, :root[data-theme="stoic"] .tt-l, :root[data-theme="stoic"] .pts { font-family: var(--st-statement); font-weight: 600; font-size: 14px; letter-spacing: .02em; color: #5B4F70; }
+:root[data-theme="stoic"] .sc-t span { font-size: 15px; }
+:root[data-theme="stoic"] .big, :root[data-theme="stoic"] .dl-days b, :root[data-theme="stoic"] .dl-stats dd, :root[data-theme="stoic"] #goalVal { font-family: var(--st-statement); font-weight: 600; }
+:root[data-theme="stoic"] .dl-stats dd { font-size: 26px; color: var(--st-imperial); }
+:root[data-theme="stoic"] .state strong, :root[data-theme="stoic"] .empty-row strong { font-family: var(--st-statement); font-size: 20px; }
+
+/* ---- palette: imperial purple + laurel gold ---- */
+:root[data-theme="stoic"] .vbtn[aria-pressed="true"],
+:root[data-theme="stoic"] .pill.main,
+:root[data-theme="stoic"] .sen-focus-ctl .mini-btn,
+:root[data-theme="stoic"] .themeseg button[aria-pressed="true"],
+:root[data-theme="stoic"] .chip[aria-pressed="true"],
+:root[data-theme="stoic"] .tb-seg button[aria-pressed="true"] { background: var(--st-imperial); border-color: var(--st-imperial); color: #F7F1E3; }
+:root[data-theme="stoic"] .pill.main { border-bottom: 2px solid var(--st-gold); font-family: var(--st-display); font-weight: 600; font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; padding: 10px 18px; border-radius: 2px; }
+:root[data-theme="stoic"] .pill.main:hover, :root[data-theme="stoic"] .sen-focus-ctl .mini-btn:hover { background: var(--st-imperial-2); }
+:root[data-theme="stoic"] .pill:not(.main), :root[data-theme="stoic"] .mini-btn, :root[data-theme="stoic"] .stoic-rq, :root[data-theme="stoic"] .savebtn {
+  font-family: var(--st-display); font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; border-radius: 2px; color: var(--st-imperial); border-color: color-mix(in srgb, var(--st-gold) 55%, #C9C3B6);
+}
+:root[data-theme="stoic"] .pill:not(.main):hover, :root[data-theme="stoic"] .mini-btn:hover, :root[data-theme="stoic"] .stoic-rq:hover, :root[data-theme="stoic"] .savebtn:hover { border-color: var(--st-gold); background: #FAF5E8; color: var(--st-imperial); }
+:root[data-theme="stoic"] .tt-item .mini-btn { font-size: 9.5px; letter-spacing: .1em; border-color: transparent; }
+:root[data-theme="stoic"] .themeseg button { font-family: var(--st-display); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+:root[data-theme="stoic"] .themeseg, :root[data-theme="stoic"] .tb-seg { border-color: color-mix(in srgb, var(--st-gold) 55%, #C9C3B6); border-radius: 2px; }
+:root[data-theme="stoic"] .sen-mark { background: var(--st-imperial); color: var(--st-gold-2); font-family: var(--st-display); font-weight: 700; font-size: 14px; border: 1px solid var(--st-gold); border-radius: 2px; box-shadow: inset 0 0 0 2px var(--st-imperial), inset 0 0 0 3px var(--st-gold-faint); }
+:root[data-theme="stoic"] .sen-badge { font-family: var(--st-display); font-size: 9.5px; letter-spacing: .14em; font-weight: 700; }
+:root[data-theme="stoic"] .badge.now { background: var(--st-gold-deep); }
+
+:root[data-theme="stoic"] .meter, :root[data-theme="stoic"] .sen-bal .meter, :root[data-theme="stoic"] .stoic-cov .meter { background: #E7DFCB; }
+:root[data-theme="stoic"] .meter i, :root[data-theme="stoic"] .sen-bal .meter i, :root[data-theme="stoic"] .stoic-cov .meter i { background: linear-gradient(90deg, var(--st-imperial-2), var(--st-imperial)); }
+:root[data-theme="stoic"] .studybar .meter i { background: linear-gradient(90deg, var(--st-gold-deep), var(--st-gold-2)); }
+:root[data-theme="stoic"] .sen-list li::before { background: var(--st-gold); }
+:root[data-theme="stoic"] #planTimeline .tt-item.rev, :root[data-theme="stoic"] .sen-maxim { border-left-color: var(--st-gold); }
+:root[data-theme="stoic"] .sen-maxim { box-shadow: inset 3px 0 0 var(--st-gold); }
+:root[data-theme="stoic"] .sen-maxim::before { content: "\201C"; position: absolute; left: 10px; top: -2px; font-size: 38px; line-height: 1; color: var(--st-gold-faint); font-style: normal; font-family: var(--st-statement); }
+:root[data-theme="stoic"] .sen-maxim { padding-left: 52px !important; }
+:root[data-theme="stoic"] .stepper button, :root[data-theme="stoic"] .sen-tgt .stepper button { border-color: color-mix(in srgb, var(--st-gold) 55%, #C9C3B6); border-radius: 2px; color: var(--st-imperial); }
+
+/* ---- cards: gold top rule + inner hairline frame ---- */
+:root[data-theme="stoic"] .card, :root[data-theme="stoic"] .sg-counsel, :root[data-theme="stoic"] .sen-head { border-top: 2px solid var(--st-gold); border-radius: 2px; }
+:root[data-theme="stoic"] .card, :root[data-theme="stoic"] .sg-counsel { outline: 1px solid var(--st-gold-faint); outline-offset: -6px; }
+:root[data-theme="stoic"] .sg-brief, :root[data-theme="stoic"] .sg-risks, :root[data-theme="stoic"] .sen-acts, :root[data-theme="stoic"] .sen-maxim { border-radius: 0; }
+:root[data-theme="stoic"] .sen-head { border-radius: 2px 2px 0 0; }
+:root[data-theme="stoic"] .sen-acts { border-radius: 0 0 2px 2px; }
+:root[data-theme="stoic"] .sen-bal-item, :root[data-theme="stoic"] .sen-tgt, :root[data-theme="stoic"] .sen-pair .sen-focus { border-radius: 2px; border-color: color-mix(in srgb, var(--st-gold) 40%, #D9D2C0); background: #FEFDFA; }
+:root[data-theme="stoic"] .sen-routine li, :root[data-theme="stoic"] #planTimeline .tt-row, :root[data-theme="stoic"] .plan-list li { border-bottom-color: var(--st-gold-faint); }
+:root[data-theme="stoic"] .sg-counsel::before { background: linear-gradient(90deg, var(--st-gold), transparent) left bottom/100% 1px no-repeat; border-bottom: 0; padding-bottom: 14px; }
+:root[data-theme="stoic"] #planTimeline .cb-head { border-bottom: 0; background: linear-gradient(90deg, var(--st-gold), transparent) left bottom/100% 1px no-repeat; padding-bottom: 14px; }
+:root[data-theme="stoic"] details.addwrap > summary { font-family: var(--st-display); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--st-imperial); }
+
+/* ---- icons: custom column / scroll / laurel, drawn as masks ---- */
+:root[data-theme="stoic"] .vbtn svg { display: none; }
+:root[data-theme="stoic"] .vbtn::before, :root[data-theme="stoic"] .top h1::before, :root[data-theme="stoic"] .stoic-rq::before {
+  content: ""; flex: none; background-color: currentColor; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain;
+}
+:root[data-theme="stoic"] .vbtn::before { width: 22px; height: 22px; opacity: .8; }
+:root[data-theme="stoic"] .vbtn[aria-pressed="true"]::before { color: var(--st-gold-2); opacity: 1; }
+:root[data-theme="stoic"] .vbtn[data-view="plan"]::before { -webkit-mask-image: var(--ic-temple); mask-image: var(--ic-temple); }
+:root[data-theme="stoic"] .vbtn[data-view="tracker"]::before { -webkit-mask-image: var(--ic-scroll); mask-image: var(--ic-scroll); }
+:root[data-theme="stoic"] .vbtn[data-view="test"]::before { -webkit-mask-image: var(--ic-laurel); mask-image: var(--ic-laurel); }
+:root[data-theme="stoic"] .top h1::before { width: 26px; height: 26px; background: var(--st-gold); -webkit-mask-image: var(--ic-temple); mask-image: var(--ic-temple); }
+:root[data-theme="stoic"] .stoic-rq { display: inline-flex; align-items: center; gap: 8px; }
+:root[data-theme="stoic"] .stoic-rq::before { width: 15px; height: 15px; color: var(--st-gold-deep); -webkit-mask-image: var(--ic-scroll); mask-image: var(--ic-scroll); }
+:root[data-theme="stoic"] {
+  --ic-temple: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8.5 12 3l9 5.5H3z'/%3E%3Cpath d='M5 11v7M9.5 11v7M14.5 11v7M19 11v7'/%3E%3Cpath d='M3.5 20.5h17M4.5 18h15'/%3E%3C/svg%3E");
+  --ic-scroll: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 4h10a2 2 0 0 1 2 2v1.5a1.5 1.5 0 0 1-1.5 1.5H16'/%3E%3Cpath d='M8 4a2 2 0 0 0-2 2v11a2 2 0 0 1-2 2 2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9'/%3E%3Cpath d='M9.5 9.5h4M9.5 13h4M9.5 16.5h2.5'/%3E%3C/svg%3E");
+  --ic-laurel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21C7 21 4 17 4 12'/%3E%3Cpath d='M12 21c5 0 8-4 8-9'/%3E%3Cpath d='M4.6 9.2l2.4.9M4 13l2.6-.2M5.4 16.6l2.4-1.2M19.4 9.2l-2.4.9M20 13l-2.6-.2M18.6 16.6l-2.4-1.2'/%3E%3Cpath d='m12 7.5 1.2 2.3 2.5.4-1.8 1.8.4 2.5-2.3-1.2-2.3 1.2.4-2.5-1.8-1.8 2.5-.4z'/%3E%3C/svg%3E");
+  --meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cpath d='M0 9.5h2.5V.8H11v6.4H5.5V4h3' fill='none' stroke='%23B08D3C' stroke-width='1.1' stroke-linecap='square' opacity='.75' transform='translate(0 0)'/%3E%3Cpath d='M12 9.5h2.5V.8H23' fill='none' stroke='%23B08D3C' stroke-width='1.1' stroke-linecap='square' opacity='.75'/%3E%3C/svg%3E");
+}
+
+/* ---- desktop shell ornaments: fluted sidebar, Greek-key borders ---- */
+@media (min-width: 1000px) {
+  :root[data-theme="stoic"] main {
+    background:
+      repeating-linear-gradient(90deg, rgba(90, 65, 20, .028) 0 1px, transparent 1px 10px) 0 0 / 267px 100% no-repeat,
+      linear-gradient(to right, var(--st-side) 0, var(--st-side) 266px, var(--st-gold-2) 266px, var(--st-gold-2) 268px, var(--page) 268px);
+  }
+  :root[data-theme="stoic"] main::before { font-family: var(--st-display); font-weight: 600; font-size: 22px; letter-spacing: .18em; text-transform: uppercase; color: var(--st-imperial); border-bottom: 0; padding: 26px 0 22px 32px; }
+  :root[data-theme="stoic"] main::after {
+    content: ""; grid-column: 3 / -1; grid-row: 1; align-self: end; height: 10px; background: var(--meander) left bottom / 24px 10px repeat-x; border-bottom: 1px solid var(--st-gold-faint); pointer-events: none; margin-left: 32px; margin-right: 28px;
+  }
+  :root[data-theme="stoic"] .top > div:first-child { padding-top: 26px; }
+  :root[data-theme="stoic"] .backup-foot { border-top: 0; padding-top: 22px; background: var(--meander) left top / 24px 10px repeat-x; margin-left: 24px !important; margin-right: 24px !important; }
+  :root[data-theme="stoic"] .backup-foot .linkbtn { font-family: var(--st-display); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--st-imperial); }
+  :root[data-theme="stoic"] .stoic-cov { border-top: 0; background: linear-gradient(90deg, var(--st-gold), transparent) left top / 100% 1px no-repeat; }
+  :root[data-theme="stoic"] .vbtn { padding: 12px 14px; border-radius: 2px; }
+  :root[data-theme="stoic"] .vbtn span { font-family: var(--st-display); font-size: 12.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+  :root[data-theme="stoic"] .vbtn[aria-pressed="true"] { border-left: 3px solid var(--st-gold-2); box-shadow: inset 0 0 0 1px rgba(201, 162, 77, .25); }
+  :root[data-theme="stoic"] #planCard .eyebrow { font-size: 14px; }
+}
+@media (max-width: 999px) {
+  :root[data-theme="stoic"] .vbtn span { font-family: var(--st-display); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; }
+  :root[data-theme="stoic"] .vbtn[aria-pressed="true"] { background: transparent; color: var(--st-imperial); border-bottom-color: var(--st-gold); }
+  :root[data-theme="stoic"] .vbtn[aria-pressed="true"]::before { color: var(--st-gold-deep); }
+  :root[data-theme="stoic"] .top { background: var(--st-side); }
+}
+
+/* wide Roman capitals need room: tighten the top bar on smaller desktop windows */
+@media (min-width: 1000px) and (max-width: 1299px) {
+  :root[data-theme="stoic"] .stoic-rq { display: none; }
+  :root[data-theme="stoic"] main::before { font-size: 18px; letter-spacing: .14em; }
+  :root[data-theme="stoic"] .vbtn span { letter-spacing: .08em; }
+  :root[data-theme="stoic"] .sen-bal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root[data-theme="stoic"] .td-layout, :root[data-theme="stoic"] #seneca { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+}
+:root[data-theme="stoic"] .sen-tgt strong { white-space: nowrap; }
+@media (min-width: 1000px) and (max-width: 1299px) {
+  :root[data-theme="stoic"] .sen-tgt strong { font-size: 28px; }
+  :root[data-theme="stoic"] .sen-tgt .stepper button { width: 24px; height: 24px; }
+  :root[data-theme="stoic"] .sen-pair .sen-timer { font-size: 26px; }
+}
+
+
+/* ---- sturdier type: no thin faces ---- */
+:root[data-theme="stoic"] {
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-num: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --st-statement: "EB Garamond", Georgia, "Times New Roman", serif;
+  --font-serif: "EB Garamond", Georgia, "Times New Roman", serif;
+}
+:root[data-theme="stoic"] body { font-size: 14px; color: #1F1A2B; }
+:root[data-theme="stoic"] h1, :root[data-theme="stoic"] main::before { font-weight: 700; }
+:root[data-theme="stoic"] .eyebrow, :root[data-theme="stoic"] #planCard .eyebrow, :root[data-theme="stoic"] #planTimeline .eyebrow,
+:root[data-theme="stoic"] .sug-fold-sum, :root[data-theme="stoic"] .sen-head .eyebrow, :root[data-theme="stoic"] .sg-counsel::before { font-weight: 700; }
+:root[data-theme="stoic"] .sen-sub, .sc-h, :root[data-theme="stoic"] .sen-tgt small, :root[data-theme="stoic"] .sen-focus-info small,
+:root[data-theme="stoic"] .tt-head, :root[data-theme="stoic"] .dl-stats dt { font-weight: 700; color: #6E531C; }
+:root[data-theme="stoic"] .vbtn span, :root[data-theme="stoic"] .pill.main, :root[data-theme="stoic"] .pill:not(.main), :root[data-theme="stoic"] .mini-btn,
+:root[data-theme="stoic"] .stoic-rq, :root[data-theme="stoic"] .savebtn, :root[data-theme="stoic"] .themeseg button, :root[data-theme="stoic"] .sen-badge,
+:root[data-theme="stoic"] .backup-foot .linkbtn, :root[data-theme="stoic"] #planTimeline .tt-n, :root[data-theme="stoic"] .sen-bal-top b, :root[data-theme="stoic"] .sc-t b { font-weight: 700; }
+:root[data-theme="stoic"] .vbtn span { font-size: 12.5px; }
+
+/* statements and the maxim: EB Garamond, heavier and darker */
+:root[data-theme="stoic"] .sen-maxim { font-family: var(--st-statement); font-style: italic; font-weight: 500; font-size: 19px; color: #2F2742; }
+:root[data-theme="stoic"] .sg-brief > p:first-child { font-family: var(--font-ui); font-weight: 400; font-size: 15.5px; line-height: 1.6; color: #1F1A2B; }
+:root[data-theme="stoic"] .state strong, :root[data-theme="stoic"] .empty-row strong { font-family: var(--st-statement); font-weight: 600; }
+
+/* figures: Inter semibold (clear, tabular) */
+:root[data-theme="stoic"] .sen-tgt strong { font-family: var(--font-ui); font-weight: 600; font-size: 30px; letter-spacing: -.01em; }
+:root[data-theme="stoic"] .sen-tgt strong i { font-family: var(--font-ui); font-weight: 700; }
+:root[data-theme="stoic"] .sen-timer { font-family: var(--font-ui); font-weight: 600; font-size: 28px; letter-spacing: -.01em; }
+:root[data-theme="stoic"] .sen-focus-info strong { font-family: var(--font-ui); font-weight: 600; font-size: 14px; }
+:root[data-theme="stoic"] .studybar .big { font-family: var(--font-ui); font-weight: 600; font-size: 34px; letter-spacing: -.02em; }
+:root[data-theme="stoic"] .dl-stats dd { font-family: var(--font-ui); font-weight: 600; font-size: 22px; }
+:root[data-theme="stoic"] .big, :root[data-theme="stoic"] .dl-days b, :root[data-theme="stoic"] #goalVal { font-family: var(--font-ui); font-weight: 600; }
+:root[data-theme="stoic"] .sen-bal-top span, :root[data-theme="stoic"] .sc-t span, :root[data-theme="stoic"] .rt-t, :root[data-theme="stoic"] .rt-p,
+:root[data-theme="stoic"] .tt-t, :root[data-theme="stoic"] .tt-l, :root[data-theme="stoic"] .pts { font-family: var(--font-ui); font-weight: 500; font-size: 12.5px; letter-spacing: 0; color: #4B4360; }
+:root[data-theme="stoic"] .sc-t span { font-size: 12.5px; }
+:root[data-theme="stoic"] .rt-p, :root[data-theme="stoic"] .pts { font-weight: 600; color: var(--st-imperial); }
+:root[data-theme="stoic"] .sen-list li, :root[data-theme="stoic"] .sen-routine li { color: #2E2840; }
+@media (min-width: 1000px) {
+  :root[data-theme="stoic"] #planTimeline .tt-row.now { background: #FBF7EA; box-shadow: inset 3px 0 0 var(--st-gold); padding-left: 12px; }
+}
+
+
+/* ---- Classic serif, upright (Merriweather) ---- */
+:root[data-theme="stoic"] {
+  --font-ui: "Merriweather", Georgia, "Times New Roman", serif;
+  --font-num: "Merriweather", Georgia, "Times New Roman", serif;
+  --font-serif: "Merriweather", Georgia, "Times New Roman", serif;
+  --st-statement: "Merriweather", Georgia, "Times New Roman", serif;
+}
+:root[data-theme="stoic"] body { font-size: 13px; line-height: 1.6; }
+:root[data-theme="stoic"] i, :root[data-theme="stoic"] em, :root[data-theme="stoic"] .tt-empty, :root[data-theme="stoic"] .sen-maxim, :root[data-theme="stoic"] .state, :root[data-theme="stoic"] .empty-row { font-style: normal; }
+:root[data-theme="stoic"] .sen-maxim { font-weight: 400; font-size: 15px; line-height: 1.6; color: #2A2338; }
+:root[data-theme="stoic"] .sg-brief > p:first-child { font-size: 14px; line-height: 1.7; }
+:root[data-theme="stoic"] .sen-tgt strong { font-size: 26px; font-weight: 700; }
+:root[data-theme="stoic"] .sen-tgt strong i { font-style: normal; }
+:root[data-theme="stoic"] .sen-timer { font-size: 24px; font-weight: 700; }
+:root[data-theme="stoic"] .sen-focus-info strong { font-size: 13px; font-weight: 700; line-height: 1.45; }
+:root[data-theme="stoic"] .studybar .big { font-size: 30px; font-weight: 700; }
+:root[data-theme="stoic"] .dl-stats dd { font-size: 20px; font-weight: 700; }
+:root[data-theme="stoic"] .big, :root[data-theme="stoic"] .dl-days b, :root[data-theme="stoic"] #goalVal { font-weight: 700; }
+:root[data-theme="stoic"] .sen-bal-top { flex-wrap: wrap; gap: 2px 8px; }
+:root[data-theme="stoic"] .sen-bal-top span, :root[data-theme="stoic"] .sc-t span, :root[data-theme="stoic"] .rt-t, :root[data-theme="stoic"] .rt-p,
+:root[data-theme="stoic"] .tt-t, :root[data-theme="stoic"] .tt-l, :root[data-theme="stoic"] .pts { font-size: 11.5px; font-weight: 400; }
+:root[data-theme="stoic"] .rt-p, :root[data-theme="stoic"] .pts { font-weight: 700; }
+:root[data-theme="stoic"] .sen-list li, :root[data-theme="stoic"] .sen-routine li, :root[data-theme="stoic"] .plan-list li { font-size: 12.5px; }
+:root[data-theme="stoic"] .studybar .overall-side small, :root[data-theme="stoic"] .nm small, :root[data-theme="stoic"] .note { font-size: 11px; }
+:root[data-theme="stoic"] .state strong, :root[data-theme="stoic"] .empty-row strong { font-size: 16px; font-weight: 700; }
+
+/* ---- Tick boxes: engraved square, gold edge, imperial fill + gold check ---- */
+:root[data-theme="stoic"] .tick, :root[data-theme="stoic"] .pcell {
+  width: 24px; height: 24px; border-radius: 3px; border: 1.5px solid #B9A56E; background: #FFFDF7;
+  box-shadow: inset 0 0 0 2px #FFFDF7, inset 0 0 0 3px rgba(176, 141, 60, .18);
+  transition: background .12s, border-color .12s, box-shadow .12s;
+}
+:root[data-theme="stoic"] .tick:hover { border-color: var(--st-gold); background: #FBF5E4; }
+:root[data-theme="stoic"] .tick svg { width: 15px; height: 15px; stroke: var(--st-gold-2); stroke-width: 3; }
+:root[data-theme="stoic"] .tick[aria-pressed="true"] { background: var(--st-imperial); border-color: var(--st-imperial); box-shadow: inset 0 0 0 1.5px var(--st-imperial), inset 0 0 0 2.5px rgba(201, 162, 77, .55); }
+:root[data-theme="stoic"] .tick:focus-visible, :root[data-theme="stoic"] .heat:focus-visible { outline: 2px solid var(--st-gold); outline-offset: 2px; }
+
+/* read counters: gold-to-imperial scale instead of yellow-to-red */
+:root[data-theme="stoic"] .heat { min-width: 32px; height: 24px; border-radius: 3px; border: 1.5px dashed #CDBE92; background: transparent; font-family: var(--font-ui); font-size: 11.5px; font-weight: 700; color: var(--st-imperial); padding: 0 6px; }
+:root[data-theme="stoic"] .heat:hover { border-color: var(--st-gold); background: #FBF5E4; }
+:root[data-theme="stoic"] .heat[data-level="1"] { background: #F3E9C8; border: 1.5px solid #D9C67F; color: #5E4714; }
+:root[data-theme="stoic"] .heat[data-level="2"] { background: #E4CE8A; border: 1.5px solid #C9AE5A; color: #4A3810; }
+:root[data-theme="stoic"] .heat[data-level="3"] { background: var(--st-gold); border: 1.5px solid #8E6F28; color: #FFF8E4; }
+:root[data-theme="stoic"] .heat[data-level="4"] { background: #5A4680; border: 1.5px solid #46346A; color: #F5E9C4; }
+:root[data-theme="stoic"] .heat[data-level="5"] { background: var(--st-imperial); border: 1.5px solid var(--st-imperial); color: var(--st-gold-2); }
+
+/* native checkboxes (test builder, source manager) */
+:root[data-theme="stoic"] input[type="checkbox"] {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px; flex: none; margin: 0; vertical-align: middle; cursor: pointer;
+  border: 1.5px solid #B9A56E; border-radius: 3px; background: #FFFDF7 center / 12px no-repeat; box-shadow: inset 0 0 0 2px #FFFDF7, inset 0 0 0 3px rgba(176, 141, 60, .18);
+}
+:root[data-theme="stoic"] input[type="checkbox"]:hover { border-color: var(--st-gold); }
+:root[data-theme="stoic"] input[type="checkbox"]:checked {
+  background-color: var(--st-imperial); border-color: var(--st-imperial); box-shadow: inset 0 0 0 1.5px var(--st-imperial), inset 0 0 0 2.5px rgba(201, 162, 77, .55);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C9A24D' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+}
+:root[data-theme="stoic"] input[type="checkbox"]:focus-visible { outline: 2px solid var(--st-gold); outline-offset: 2px; }
+
+</style>
 <script>
 (function(){
   var root=document.documentElement, KEY="syllabus-theme", cur="light";
@@ -5037,6 +5567,10 @@ body.ql-open { overflow: hidden; }
   function apply(t){
     cur=t; root.setAttribute("data-theme",t);
     var p=document.getElementById("portal"); if(p) p.disabled=(t==="dark"||t==="stoic");
+    Array.prototype.forEach.call(document.querySelectorAll("details.sug-fold"),function(d){
+      if(t==="stoic"){ if(d.__wasOpen===undefined) d.__wasOpen=d.open; d.open=true; }
+      else if(d.__wasOpen!==undefined){ d.open=d.__wasOpen; d.__wasOpen=undefined; }
+    });
     var sw=document.getElementById("themeSwitch");
     if(sw) Array.prototype.forEach.call(sw.querySelectorAll("[data-settheme]"),function(btn){
       btn.setAttribute("aria-pressed", String(btn.getAttribute("data-settheme")===t));
@@ -6248,14 +6782,17 @@ body.ql-open { overflow: hidden; }
       "Luck is what happens when preparation meets opportunity. — Seneca"
     ];
     var dayIdx = Math.floor(Date.now() / 86400000) % maxims.length;
-    var body = '<p class="sen-maxim">' + esc(maxims[dayIdx]) + '</p><div class="sen-say"><p>' + esc(st.text) + '</p>';
+    var body = '<p class="sen-maxim">' + esc(maxims[dayIdx]) + '</p><div class="sen-say"><div class="sg sg-brief"><p>' + esc(st.text) + '</p>';
     body += '<p><b>Today:</b> ' + fnum(ctx.todayPts) + ' / ' + ctx.target + ' pts completed' + (ctx.pendPts > 0 ? ', ' + fnum(ctx.pendPts) + ' pts pending in plan' : '') + '.</p>';
     body += '<div class="sen-bal" aria-label="Subject balance">' + SUBJ.map(function (sb) {
       var m = summary(sb);
       return '<div class="sen-bal-item"><div class="sen-bal-top"><b>' + esc(LABEL[sb]) + '</b><span>' + fnum(m.done) + '/' + fint(m.total) + '</span></div><div class="meter" aria-hidden="true"><i style="width:' + (m.pct * 100) + '%"></i></div></div>';
     }).join("") + '</div>';
 
+    /* Alternate-theme tiles: today's target and the focus timer sit side by side. Hidden in Light and Dark. */
+    body += '<div class="sen-pair"><div class="sen-tgt"><div class="sen-tgt-info"><small>Today\'s target</small><strong><b>' + fnum(ctx.todayPts) + '</b> / ' + ctx.target + ' <i>pts</i></strong></div><span class="stepper"><button type="button" data-goal="-1" aria-label="Lower target">\u2212</button><button type="button" data-goal="1" aria-label="Raise target">+</button></span></div>';
     var focusItem = (ctx.curBlk && !ctx.curBlk.done) ? ctx.curBlk : (ctx.nxtBlk || ctx.pendItems[0] || null);
+    if (!focusItem) body += '<div class="sen-focus sen-focus-empty"><div class="sen-focus-info"><small>Focused study block</small><strong>Nothing planned yet</strong></div></div>';
     if (focusItem) {
       var curMode = modeOf(planKey(0)), curTpl = ttFor(curMode), tplById = {};
       curTpl.forEach(function (b) { tplById[b.id] = b; });
@@ -6282,6 +6819,7 @@ body.ql-open { overflow: hidden; }
         '<button type="button" class="mini-btn" data-sentimer="1">' + (tm.running ? "Pause" : "Start") + '</button>' +
         '<button type="button" class="pill" data-senreset="1">Reset</button></div></div>';
     }
+    body += '</div></div><div class="sg sg-counsel">';
 
     // Current scheduled routine
     var timed = ctx.items.filter(function (r) { return r.start && r.end; }).sort(function (a, b) { return toMin(a.start) - toMin(b.start); });
@@ -6324,12 +6862,22 @@ body.ql-open { overflow: hidden; }
     }
 
     var risks = senRisks(ctx);
+    body += '</div><div class="sg sg-risks">';
     if (risks.length) {
       body += '<p class="sen-sub">Risks</p><ul class="sen-list">' + risks.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join("") + '</ul>';
     }
-    body += '</div>';
+    body += '</div></div>';
 
     host.innerHTML = html + body + (acts.length ? '<div class="sen-acts">' + acts.join("") + '</div>' : '');
+
+    /* Alternate theme: mirror subject coverage into the sidebar and the revision count into the top bar. */
+    var cov = $("stoicCov");
+    if (cov) cov.innerHTML = '<p class="sc-h">Subject coverage</p>' + SUBJ.map(function (sb) {
+      var m = summary(sb);
+      return '<div class="sc-i"><div class="sc-t"><b>' + esc(LABEL[sb]) + '</b><span>' + Math.round(m.pct * 100) + '%</span></div><div class="meter" aria-hidden="true"><i style="width:' + (m.pct * 100) + '%"></i></div></div>';
+    }).join("");
+    var rqb = $("stoicRq");
+    if (rqb) { var rqi = revInfo(); rqb.textContent = "Revision queue" + (rqi && rqi.n != null ? " (" + rqi.n + ")" : ""); }
   }
   function senPlace() {
     var r = state.sview === "manual" ? autoPlaceOpen() : autoPlaceBlocks();
@@ -8413,5 +8961,185 @@ body.ql-open { overflow: hidden; }
   }
 })();
 </script><div class="tip fixed" role="tooltip" hidden="" style="left: 1207px; top: 804px;"><b>Wed, 6 Jan 2027</b><ul><li><span>Needed to finish on time</span><span>about 572</span></li></ul></div>
+<!-- ========================================== -->
+<!-- SENECA JARVIS AI & OFFLINE WASM VOICE      -->
+<!-- ========================================== -->
+<style>
+  #seneca-orb {
+    position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 50%;
+    background: #1A3151; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    display: grid; place-items: center; cursor: pointer; z-index: 99999;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #seneca-orb svg { width: 28px; height: 28px; stroke: #fff; fill: none; stroke-width: 2; }
+  #seneca-orb.listening { background: #C0261B; animation: pulse-ring 2s infinite; }
+  #seneca-orb.thinking { background: #C26A00; }
+  #seneca-orb.speaking { background: #2E7D32; }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(192, 38, 27, 0.5); }
+    70% { box-shadow: 0 0 0 20px rgba(192, 38, 27, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(192, 38, 27, 0); }
+  }
+  #seneca-ai-settings { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100000; place-items: center; backdrop-filter: blur(4px); }
+  #seneca-ai-settings.active { display: grid; }
+  .seneca-modal { background: #1C1C1C; color: #fff; padding: 24px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #333; font-family: sans-serif; }
+  .seneca-modal h3 { margin-top: 0; font-family: Georgia, serif; font-size: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+  .seneca-modal label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #888; margin: 16px 0 4px; }
+  .seneca-modal input { width: 100%; padding: 10px; background: #000; border: 1px solid #444; color: #fff; border-radius: 4px; font-family: monospace; box-sizing: border-box; }
+  .seneca-modal button { width: 100%; padding: 12px; margin-top: 20px; background: #fff; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+</style>
 
+<div id="seneca-orb" title="Toggle Seneca Assistant (Double-click for settings)">
+  <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+</div>
+
+<div id="seneca-ai-settings">
+  <div class="seneca-modal">
+    <h3>Seneca AI Config</h3>
+    <label>Base URL</label>
+    <input type="text" id="sai-url" placeholder="https://api.deepseek.com">
+    <label>API Key</label>
+    <input type="password" id="sai-key" placeholder="sk-...">
+    <label>Model Name</label>
+    <input type="text" id="sai-model" placeholder="deepseek-flash">
+    <button id="sai-save">Save & Close</button>
+    <p style="font-size:10px; color:#888; margin-top:12px; text-align:center;">Double-click the glowing orb to open settings.</p>
+  </div>
+</div>
+
+<script>
+(function() {
+  // 1. AI Config Setup (Defaulting to DeepSeek)
+  const DEFAULT_CONFIG = { url: "https://api.deepseek.com", key: "", model: "deepseek-flash" };
+  function getConfig() { const saved = localStorage.getItem("seneca_ai_config"); return saved ? JSON.parse(saved) : DEFAULT_CONFIG; }
+  
+  const conf = getConfig();
+  document.getElementById('sai-url').value = conf.url;
+  document.getElementById('sai-key').value = conf.key;
+  document.getElementById('sai-model').value = conf.model;
+
+  document.getElementById('sai-save').onclick = () => {
+    const newConf = { url: document.getElementById('sai-url').value.trim(), key: document.getElementById('sai-key').value.trim(), model: document.getElementById('sai-model').value.trim() };
+    localStorage.setItem("seneca_ai_config", JSON.stringify(newConf));
+    document.getElementById('seneca-ai-settings').classList.remove('active');
+  };
+
+  const orb = document.getElementById('seneca-orb');
+  let isListening = false, isSpeaking = false, recognition = null;
+  let piperTTS = null; // Holds the offline WASM engine
+
+  // 2. The Offline WASM Voice Function
+  async function speak(text) {
+    if (!text) return;
+    orb.className = 'speaking'; isSpeaking = true;
+
+    try {
+      // Dynamically load Piper TTS (Offline WebAssembly) on first use
+      if (!piperTTS) {
+        piperTTS = await import('https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm');
+      }
+
+      // 'en_GB-alan-medium' is a British male voice
+      const wavBlob = await piperTTS.predict({ text: text, voiceId: 'en_GB-alan-medium' });
+      const audio = new Audio(URL.createObjectURL(wavBlob));
+      
+      audio.onended = () => {
+        orb.className = ''; isSpeaking = false;
+        if (isListening) startListening();
+      };
+      await audio.play();
+
+    } catch (e) {
+      console.error("Piper WASM TTS failed:", e);
+      orb.className = ''; isSpeaking = false;
+      if (isListening) startListening();
+    }
+  }
+
+  // 3. Microphone & Speech Recognition
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true; recognition.interimResults = false; recognition.lang = 'en-IN';
+
+    recognition.onstart = () => { isListening = true; if(!isSpeaking) orb.className = 'listening'; };
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript.trim();
+      if (transcript.length > 2) processAI(transcript);
+    };
+    recognition.onerror = (e) => { if (e.error === 'not-allowed') { isListening = false; orb.className = ''; alert("Mic access denied."); } };
+    recognition.onend = () => { if (isListening && !isSpeaking) recognition.start(); };
+  }
+
+  function startListening() { if (recognition && !isListening) { try { recognition.start(); } catch(e) {} } }
+  function stopListening() { isListening = false; orb.className = ''; if (recognition) recognition.stop(); }
+
+  orb.onclick = () => { if (isListening || isSpeaking) stopListening(); else startListening(); };
+  orb.ondblclick = () => document.getElementById('seneca-ai-settings').classList.add('active');
+
+  // 4. Read the App State & Send to AI
+  function getAppContext() {
+    let context = "Current State:\n";
+    const overall = document.getElementById('overallPct')?.textContent || "0%";
+    const tabs = Array.from(document.querySelectorAll('.tab-name')).map(t => t.textContent).join(', ');
+    context += `Overall Completion: ${overall}\nSubjects: ${tabs}\n`;
+    return context;
+  }
+
+  async function processAI(userText) {
+    const c = getConfig();
+    if (!c.key) { speak("Please double click the orb to enter your API key."); stopListening(); return; }
+    
+    orb.className = 'thinking';
+    if (recognition) recognition.stop();
+
+    const systemPrompt = `You are Seneca, a stoic study assistant. Speak concisely, like a refined British butler. 
+    You have access to the user's study app. ${getAppContext()}
+    If the user asks you to perform an action, return ONLY a JSON block: {"action": "tick", "subject": "Biology", "chapter": "1"}
+    Otherwise, respond normally with stoic advice.`;
+
+    try {
+      const res = await fetch(`${c.url.replace(/\/$/, '')}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${c.key}` },
+        body: JSON.stringify({ model: c.model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userText }] })
+      });
+      const data = await res.json();
+      const reply = data.choices[0].message.content;
+      
+      if (reply.includes('{"action"')) {
+        try { 
+          const actionData = JSON.parse(reply.substring(reply.indexOf('{'))); 
+          performAction(actionData); 
+          speak("Done."); 
+        } catch(e) { speak("I understood the command, but could not execute it."); }
+      } else { 
+        speak(reply); 
+      }
+    } catch(e) { speak("I am having trouble connecting to the network."); }
+  }
+
+  // 5. Automating the App (Clicking Checkboxes)
+  function performAction(data) {
+    if (data.action === 'tick') {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(t => {
+        if (t.textContent.toLowerCase().includes(data.subject.toLowerCase())) {
+          t.click();
+          setTimeout(() => {
+             const rows = document.querySelectorAll('#grid tbody tr');
+             rows.forEach(r => {
+               const name = r.querySelector('td:first-child')?.textContent.toLowerCase();
+               if (name && name.includes(data.chapter.toLowerCase())) {
+                 const tickBtn = r.querySelector('.tick');
+                 if (tickBtn && tickBtn.getAttribute('aria-pressed') !== 'true') tickBtn.click(); 
+               }
+             });
+          }, 100);
+        }
+      });
+    }
+  }
+})();
+</script>
 </body></html>
