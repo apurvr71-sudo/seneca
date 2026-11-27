@@ -1,0 +1,6 @@
+{
+  "name": "Seneca",
+  "description": "NEET 2027 study planner, syllabus tracker, mock-test scheduler, question log, and Gemini AI study coach.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
